@@ -1,55 +1,26 @@
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_openai import AzureOpenAIEmbeddings,AzureChatOpenAI
-from langchain_community.vectorstores import FAISS #Chroma
-from langchain.chains import RetrievalQA
-from openai import AzureOpenAI
 import streamlit as st
+import tiktoken
 import time
-import os
 
-
-client = AzureOpenAI(
-  azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT"), 
-  api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
-  api_version="2023-05-15"
-)
-
-AZURE_OPENAI_GPT_DEPLOYMENT="gpt-35-turbo"
-
-pdfPath="./IRM Help.pdf"
-loader=PyPDFLoader(pdfPath)
-pages=loader.load_and_split()
-
-embedding_deployment="text-embedding-ada-002"
-embeddings = AzureOpenAIEmbeddings(deployment=embedding_deployment)
-
-if not os.path.exists("faiss_index"):
-    db = FAISS.from_documents(pages, embeddings)
-    db.save_local("faiss_index")
-else:
-    db = FAISS.load_local("faiss_index", allow_dangerous_deserialization=True,embeddings=embeddings)
-
-llm = AzureChatOpenAI(model_name="gpt-35-turbo", temperature=0.3)
-pdf_qa = RetrievalQA.from_chain_type(llm,
-             retriever=db.as_retriever(search_type="similarity_score_threshold",
-               search_kwargs={"score_threshold": 0.2}))
-# query="manage carriers?"
-# result=pdf_qa({"query":query})
+messageHeader="The token length for your input is"
+default_wiki="""In today's rapidly changing world, knowledge is constantly being refreshed, and it's essential to adapt and evolve in order to avoid becoming obsolete. The impact of macro-economic factors on our company and industry necessitates a proactive approach skill development and strategic influence to ensure that our team remains at the forefront of our organization. By leveraging our collective skills and expertise, we have the opportunity to consolidate efforts across multiple teams and achieve larger, more impactful goals. While individuals may excel in their own right, it's through collaborative efforts that we can truly propel our path forward."""
+encoding = tiktoken.encoding_for_model('gpt-3.5-turbo')
+encodedWiki=encoding.encode(default_wiki)
 
 # Streamed response emulator
 def response_generator(resMessage:str):
-    response=pdf_qa({"query":resMessage})
-    for word in response["result"].split():
+    response="{} : {} with encoding :{}.".format(messageHeader,len(encoding.encode(resMessage)),encoding)
+    for word in response.split():
         yield word + " "
         time.sleep(0.05)
 
 
-st.title("Pdf Similarity Search")
+st.title("Count Token Application")
 
-default_message="Total Pdf pages:{}, please type any text to search. eg.manage carriers.".format(len(pages))
 # Initialize chat history
 if "messages" not in st.session_state:
-    st.session_state.messages =  [{"role": "assistant","content":default_message}]
+    st.session_state.messages =  [{"role": "user","content":default_wiki},
+                                  {"role": "assistant", "content": "{} : {} with encoding :{}.".format(messageHeader,len(encodedWiki),encoding)}]
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
@@ -57,7 +28,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Accept user input
-if prompt := st.chat_input("Enter your text to search..."):
+if prompt := st.chat_input("Enter your text to calculate token..."):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     # Display user message in chat message container

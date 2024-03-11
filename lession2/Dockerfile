@@ -1,4 +1,4 @@
-FROM python:3.11.4-slim
+FROM python:3.10.13-slim
 
 # remember to expose the port your app'll be exposed on.
 EXPOSE 8234
@@ -10,7 +10,6 @@ RUN pip install -r app/requirements.txt
 
 # copy into a directory of its own (so it isn't in the toplevel dir)
 COPY . /app
-
 WORKDIR /app
 
 # run it!
