@@ -1,0 +1,9 @@
+version: '3'
+services:
+  myweb:
+    image: lession2:latest
+    env_file: ~/azure_openai/.env
+    # volumes:
+    #   - data:/app/data
+    ports:
+      - 8234:8234
