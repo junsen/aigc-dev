@@ -1,7 +1,14 @@
 version: '3'
 services:
   myweb:
-    image: lession2:latest
+    image: ai-frontend-web:latest
+    env_file: ~/azure_openai/.env
+    # volumes:
+    #   - data:/app/data
+    ports:
+      - 8234:8234
+  myService:
+    image: langchain-backend-service:latest
     env_file: ~/azure_openai/.env
     # volumes:
     #   - data:/app/data
