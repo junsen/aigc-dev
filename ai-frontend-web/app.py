@@ -22,7 +22,7 @@ st.markdown(markdown)
 chatbox, review=st.columns([6,4])
 
 # defining the api-endpoint
-API_ENDPOINT = "http://0.0.0.0:5566/conversation"
+API_ENDPOINT = "http://10.0.0.27:5566/conversation"
 DEFAULT_MESSAGE="I am your digital assistant."
 
 
