@@ -2,14 +2,14 @@ version: '3'
 services:
   myweb:
     image: ai-frontend-web:latest
-    env_file: ~/azure_openai/.env
+    env_file: ./.env
     # volumes:
     #   - data:/app/data
     ports:
       - 8234:8234
   myService:
     image: langchain-backend-service:latest
-    env_file: ~/azure_openai/.env
+    env_file: ./.env
     # volumes:
     #   - data:/app/data
     ports:
